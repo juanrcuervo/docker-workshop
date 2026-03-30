@@ -50,11 +50,11 @@ def run(pg_user, pg_pass, pg_host, pg_port, pg_db, target_table):
         parse_dates=parse_dates
     )
 
-    engine = create_engine('postgresql+psycopg://root:root@localhost:5432/ny_taxi')
+    engine = create_engine(f'postgresql+psycopg://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
 
-    print(pd.io.sql.get_schema(df, name='yellow_taxi_data', con=engine))
+    print(pd.io.sql.get_schema(df, name=target_table, con=engine))
 
-    df.head(n=0).to_sql(name='yellow_taxi_data', con=engine, if_exists='replace')
+    df.head(n=0).to_sql(name=target_table, con=engine, if_exists='replace')
 
     df_iter = pd.read_csv(
         url,
@@ -71,7 +71,7 @@ def run(pg_user, pg_pass, pg_host, pg_port, pg_db, target_table):
         if first:
             # Create table schema (no data)
             df_chunk.head(0).to_sql(
-                name="yellow_taxi_data",
+                name=target_table,
                 con=engine,
                 if_exists="replace"
             )
@@ -80,7 +80,7 @@ def run(pg_user, pg_pass, pg_host, pg_port, pg_db, target_table):
 
         # Insert chunk
         df_chunk.to_sql(
-            name="yellow_taxi_data",
+            name=target_table,
             con=engine,
             if_exists="append"
         )
